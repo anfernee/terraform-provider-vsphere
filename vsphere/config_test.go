@@ -173,7 +173,7 @@ func TestNewConfig(t *testing.T) {
 		RestSessionPath: "./qux",
 	}
 
-	r := &schema.Resource{Schema: Provider().(*schema.Provider).Schema}
+	r := &schema.Resource{Schema: Provider().(*vSphereProvider).Schema}
 	d := r.Data(nil)
 	d.Set("user", expected.User)
 	d.Set("password", expected.Password)

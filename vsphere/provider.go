@@ -13,9 +13,25 @@ import (
 // requiring contexts, and other various waiters.
 const defaultAPITimeout = time.Minute * 5
 
+// vSphereProvider implements terraform.ResourceProvider
+type vSphereProvider struct {
+	*schema.Provider
+}
+
+// Close closes the vsphere session
+func (p *vSphereProvider) Close() error {
+	meta := p.Provider.Meta()
+
+	if meta != nil {
+		return meta.(*VSphereClient).Close()
+	}
+
+	return nil
+}
+
 // Provider returns a terraform.ResourceProvider.
 func Provider() terraform.ResourceProvider {
-	return &schema.Provider{
+	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"user": &schema.Schema{
 				Type:        schema.TypeString,
@@ -140,6 +156,8 @@ func Provider() terraform.ResourceProvider {
 
 		ConfigureFunc: providerConfigure,
 	}
+
+	return &vSphereProvider{p}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {

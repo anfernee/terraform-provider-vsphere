@@ -33,6 +33,18 @@ type VSphereClient struct {
 
 	// The specialized tags client SDK imported from vmware/vic.
 	tagsClient *tags.RestClient
+
+	// whether to persist the session
+	persist bool
+}
+
+// Close closes the client session
+func (c *VSphereClient) Close() error {
+	if !c.persist && c.vimClient != nil {
+		return c.vimClient.Logout(context.TODO())
+	}
+
+	return nil
 }
 
 // TagsClient returns the embedded REST client used for tags, after determining
@@ -127,6 +139,8 @@ func (c *Config) vimURL() (*url.URL, error) {
 // Client returns a new client for accessing VMWare vSphere.
 func (c *Config) Client() (*VSphereClient, error) {
 	client := new(VSphereClient)
+
+	client.persist = c.Persist
 
 	u, err := c.vimURL()
 	if err != nil {
